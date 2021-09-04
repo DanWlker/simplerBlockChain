@@ -1,8 +1,9 @@
 import * as crypto from 'crypto';
-import { cachedDataVersionTag } from 'v8';
 import { CaseImpl } from './CaseImpl';
+import { ChainImpl } from './ChainImpl';
+import { IndvCloseContactImpl } from './IndvCloseContactImpl';
 
-class DeviceImpl implements Device {
+export class DeviceImpl implements Device {
     public publicKey: string;
     public privateKey: string;
     public ledger: Case;
@@ -30,12 +31,24 @@ class DeviceImpl implements Device {
 
         const signature = sign.sign(this.privateKey);
 
-        //send to blocks
-        
+        ChainImpl.instance.addCase(this.ledger, this.publicKey, signature);
     }
 
     signCases(signeeVerification: string) {
         this.ledger.signee = signeeVerification; //signature by doctor or what not
     }
     
+    generateFakeCases() {
+        for(let i = 0; i < 5; ++i) {
+            this.ledger.recordedCases.push(
+                new IndvCloseContactImpl(
+                    (Math.random()*100000).toString(),
+                    Date.now().toString(),
+                    (Math.random()*10).toString(),
+                    ['Bluetooth', 'Wifi'],
+                    (Math.random()*10).toString(),
+                )
+            );
+        }
+    }
 }

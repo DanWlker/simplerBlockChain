@@ -22,14 +22,15 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.BlockImpl = void 0;
 const crypto = __importStar(require("crypto"));
 class BlockImpl {
-    constructor(prevHash, ledger, ts = Date.now()) {
+    constructor(prevHash, ledger, ts = Date.now().toString()) {
         this.prevHash = prevHash;
         this.ledger = ledger;
         this.ts = ts;
+        this.nonce = Math.round(Math.random() * 999999999);
     }
     get hash() {
         const str = JSON.stringify(this);
-        const hash = crypto.createHash('SHA256');
+        const hash = crypto.createHash('MD5');
         hash.update(str).end();
         return hash.digest('hex');
     }

@@ -1,6 +1,5 @@
 import { BlockImpl } from "./BlockImpl";
 import * as crypto from 'crypto';
-import { CaseImpl } from "./CaseImpl";
 
 export class ChainImpl {
     public static instance = new ChainImpl();
@@ -20,9 +19,7 @@ export class ChainImpl {
 
     addBlock(block: BlockImpl) {
        this.mine(block);
-
-        console.log(`Returned block nonce: ${block.nonce}`)
-        this.chain.push(block);
+       this.chain.push(block);
     }
 
     mine(block: BlockImpl) {
@@ -40,19 +37,32 @@ export class ChainImpl {
         }
     }
 
-    addCase(senderCase: CaseImpl, senderPublicKey: string, signature: Buffer) {
+    addCase(senderCase: Case, senderPublicKey: string, signature: Buffer) {
+        console.log('Verifying authenticity');
         const verifier = crypto.createVerify('SHA256');
         verifier.update(senderCase.toString());
 
         const isValid = verifier.verify(senderPublicKey, signature);
 
         if(isValid) {
+            console.log('Authenticity verified, adding case..')
             this.pool.ledger.push(senderCase);
+            console.log('Case added successfully to pool');
+            console.log(`Current pool size: ${this.pool.ledger.length}`) 
+
             if(this.pool.ledger.length >= this.blockSize) {
+                console.log('Block size limit reached, creating new block');
                 this.addBlock(this.pool);
+                console.log('Clearing pool...')
                 this.pool = new BlockImpl(this.lastBlock.hash, []);
+                console.log(this);
             }
+            
+        } else {
+            console.log('Case is not valid');
         }
+
+    
 
     }
 

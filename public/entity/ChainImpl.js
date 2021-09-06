@@ -33,7 +33,6 @@ class ChainImpl {
     }
     addBlock(block) {
         this.mine(block);
-        console.log(`Returned block nonce: ${block.nonce}`);
         this.chain.push(block);
     }
     mine(block) {
@@ -48,15 +47,25 @@ class ChainImpl {
         }
     }
     addCase(senderCase, senderPublicKey, signature) {
+        console.log('Verifying authenticity');
         const verifier = crypto.createVerify('SHA256');
         verifier.update(senderCase.toString());
         const isValid = verifier.verify(senderPublicKey, signature);
         if (isValid) {
+            console.log('Authenticity verified, adding case..');
             this.pool.ledger.push(senderCase);
+            console.log('Case added successfully to pool');
+            console.log(`Current pool size: ${this.pool.ledger.length}`);
             if (this.pool.ledger.length >= this.blockSize) {
+                console.log('Block size limit reached, creating new block');
                 this.addBlock(this.pool);
+                console.log('Clearing pool...');
                 this.pool = new BlockImpl_1.BlockImpl(this.lastBlock.hash, []);
+                console.log(this);
             }
+        }
+        else {
+            console.log('Case is not valid');
         }
     }
 }

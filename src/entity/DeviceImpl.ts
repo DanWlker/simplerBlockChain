@@ -1,5 +1,4 @@
 import * as crypto from 'crypto';
-import { CaseImpl } from './CaseImpl';
 import { ChainImpl } from './ChainImpl';
 import { IndvCloseContactImpl } from './IndvCloseContactImpl';
 
@@ -18,7 +17,11 @@ export class DeviceImpl implements Device {
         this.privateKey = keypair.privateKey;
         this.publicKey = keypair.publicKey;
 
-        this.ledger = new CaseImpl(this.publicKey, [], '');
+        this.ledger = {
+            uploadedDeviceIdentifier:this.publicKey,
+            recordedCases: [],
+            signee: ''
+        } as Case;
     }
 
     sendCases(signeeVerification?: string) {
@@ -26,12 +29,16 @@ export class DeviceImpl implements Device {
             this.signCases(signeeVerification);
         }
 
+        const signature = this.returnSignature();
+
+        ChainImpl.instance.addCase(this.ledger, this.publicKey, signature);
+    }
+
+    returnSignature(){
         const sign = crypto.createSign('SHA256');
         sign.update(this.ledger.toString());
 
-        const signature = sign.sign(this.privateKey);
-
-        ChainImpl.instance.addCase(this.ledger, this.publicKey, signature);
+        return sign.sign(this.privateKey);
     }
 
     signCases(signeeVerification: string) {
@@ -42,7 +49,7 @@ export class DeviceImpl implements Device {
         for(let i = 0; i < 5; ++i) {
             this.ledger.recordedCases.push(
                 new IndvCloseContactImpl(
-                    (Math.random()*100000).toString(),
+                    (Math.round(Math.random()*100000000)).toString(),
                     Date.now().toString(),
                     (Math.random()*10).toString(),
                     ['Bluetooth', 'Wifi'],

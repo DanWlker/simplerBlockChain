@@ -1,6 +1,6 @@
 import * as crypto from 'crypto';
-import { ChainImpl } from './ChainImpl';
-import { IndvCloseContactImpl } from './IndvCloseContactImpl';
+import { Chain } from './Chain';
+
 
 export class DeviceImpl implements Device {
     public publicKey: string;
@@ -31,7 +31,7 @@ export class DeviceImpl implements Device {
 
         const signature = this.returnSignature();
 
-        ChainImpl.instance.addCase(this.ledger, this.publicKey, signature);
+        Chain.instance.addCase(this.ledger, this.publicKey, signature);
     }
 
     returnSignature(){
@@ -48,13 +48,13 @@ export class DeviceImpl implements Device {
     generateFakeCases() {
         for(let i = 0; i < 5; ++i) {
             this.ledger.recordedCases.push(
-                new IndvCloseContactImpl(
-                    (Math.round(Math.random()*100000000)).toString(),
-                    Date.now().toString(),
-                    (Math.random()*10).toString(),
-                    ['Bluetooth', 'Wifi'],
-                    (Math.random()*10).toString(),
-                )
+                {
+                    closeContactIdentifier: (Math.round(Math.random()*100000000)).toString(),
+                    dateOfContact: Date.now().toString(),
+                    distanceOfContactMetres: (Math.random()*10).toString(),
+                    mediumOfDetection: ['Bluetooth', 'Wifi'],
+                    estimatedDurationOfContact: (Math.random()*10).toString(),
+                } as IndvCloseContact
             );
         }
     }

@@ -1,4 +1,4 @@
-import { ChainImpl } from "./entity/ChainImpl";
+import { Chain } from "./entity/Chain";
 import { DeviceImpl } from "./entity/DeviceImpl";
 
 // for(let i = 0; i < 10; ++i) {
@@ -11,7 +11,6 @@ import { DeviceImpl } from "./entity/DeviceImpl";
 
 //communication with blockchain
 import express from 'express';
-import { formatWithOptions } from "util";
 let app = express();
 const portNum = 3000;
 
@@ -22,13 +21,11 @@ app.use(express.urlencoded({extended:true}));
 app.post('/insertCase', (req, res)=> {
     console.log('New case received');
     console.log(req.body);
-    let formattedReceivedObj: KeySignWrapper = 
-    {
-        publicKey: req.body.publicKey,
-        ledger: req.body.ledger,
-        signature: Buffer.from(req.body.signature.data),
-    };
-    ChainImpl.instance.addCase(formattedReceivedObj.ledger, formattedReceivedObj.publicKey,formattedReceivedObj.signature);
+
+    Chain.instance.addCase(
+        req.body.ledger as Case, 
+        req.body.publicKey,
+        Buffer.from(req.body.signature.data));
 
     res.json(
         {success: 'true'}
@@ -61,7 +58,7 @@ app.get('/receiveNewDeviceAndSignature', (req, res)=> {
 app.get('/getAllCases', (req, res)=> {
     console.log('Request for all cases received');
     res.json(
-        ChainImpl.instance.chain
+        Chain.instance.chain
     );
 });
 
@@ -77,7 +74,7 @@ app.get('/getCasesAfter', (req, res) =>{
         );
     } else {
         res.json(
-            ChainImpl.instance.getBlockAfter(hashToGet as string)
+            Chain.instance.getBlockAfter(hashToGet as string)
         );
     }
 });

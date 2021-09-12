@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const ChainImpl_1 = require("./entity/ChainImpl");
+const Chain_1 = require("./entity/Chain");
 const DeviceImpl_1 = require("./entity/DeviceImpl");
 // for(let i = 0; i < 10; ++i) {
 //     let testing = new DeviceImpl();
@@ -21,12 +21,7 @@ app.use(express_1.default.urlencoded({ extended: true }));
 app.post('/insertCase', (req, res) => {
     console.log('New case received');
     console.log(req.body);
-    let formattedReceivedObj = {
-        publicKey: req.body.publicKey,
-        ledger: req.body.ledger,
-        signature: Buffer.from(req.body.signature.data),
-    };
-    ChainImpl_1.ChainImpl.instance.addCase(formattedReceivedObj.ledger, formattedReceivedObj.publicKey, formattedReceivedObj.signature);
+    Chain_1.Chain.instance.addCase(req.body.ledger, req.body.publicKey, Buffer.from(req.body.signature.data));
     res.json({ success: 'true' });
 });
 app.get('/receiveFakeCases', (req, res) => {
@@ -48,7 +43,7 @@ app.get('/receiveNewDeviceAndSignature', (req, res) => {
 //get the cases that is not on the device 
 app.get('/getAllCases', (req, res) => {
     console.log('Request for all cases received');
-    res.json(ChainImpl_1.ChainImpl.instance.chain);
+    res.json(Chain_1.Chain.instance.chain);
 });
 app.get('/getCasesAfter', (req, res) => {
     console.log(`Request for partial cases after ${req.query.hashID} received`);
@@ -59,7 +54,7 @@ app.get('/getCasesAfter', (req, res) => {
         });
     }
     else {
-        res.json(ChainImpl_1.ChainImpl.instance.getBlockAfter(hashToGet));
+        res.json(Chain_1.Chain.instance.getBlockAfter(hashToGet));
     }
 });
 app.listen(portNum);

@@ -21,8 +21,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.DeviceImpl = void 0;
 const crypto = __importStar(require("crypto"));
-const ChainImpl_1 = require("./ChainImpl");
-const IndvCloseContactImpl_1 = require("./IndvCloseContactImpl");
+const Chain_1 = require("./Chain");
 class DeviceImpl {
     constructor() {
         const keypair = crypto.generateKeyPairSync('rsa', {
@@ -43,7 +42,7 @@ class DeviceImpl {
             this.signCases(signeeVerification);
         }
         const signature = this.returnSignature();
-        ChainImpl_1.ChainImpl.instance.addCase(this.ledger, this.publicKey, signature);
+        Chain_1.Chain.instance.addCase(this.ledger, this.publicKey, signature);
     }
     returnSignature() {
         const sign = crypto.createSign('SHA256');
@@ -55,7 +54,13 @@ class DeviceImpl {
     }
     generateFakeCases() {
         for (let i = 0; i < 5; ++i) {
-            this.ledger.recordedCases.push(new IndvCloseContactImpl_1.IndvCloseContactImpl((Math.round(Math.random() * 100000000)).toString(), Date.now().toString(), (Math.random() * 10).toString(), ['Bluetooth', 'Wifi'], (Math.random() * 10).toString()));
+            this.ledger.recordedCases.push({
+                closeContactIdentifier: (Math.round(Math.random() * 100000000)).toString(),
+                dateOfContact: Date.now().toString(),
+                distanceOfContactMetres: (Math.random() * 10).toString(),
+                mediumOfDetection: ['Bluetooth', 'Wifi'],
+                estimatedDurationOfContact: (Math.random() * 10).toString(),
+            });
         }
     }
 }

@@ -1,15 +1,6 @@
-import { Chain } from "./entity/Chain";
-import { DeviceImpl } from "./entity/DeviceImpl";
+import { Chain } from "./classes/Chain";
+import { DeviceImpl } from "./classes/DeviceImpl";
 
-// for(let i = 0; i < 10; ++i) {
-//     let testing = new DeviceImpl();
-//     testing.generateFakeCases();
-//     testing.sendCases('Dr David');
-// }
-
-// console.log(ChainImpl.instance);
-
-//communication with blockchain
 import express from 'express';
 let app = express();
 const portNum = 3000;
@@ -32,29 +23,6 @@ app.post('/insertCase', (req, res)=> {
     );
 });
 
-app.get('/receiveFakeCases', (req, res)=> {
-    console.log('Request for fake cases received');
-    let testing = new DeviceImpl();
-    testing.generateFakeCases();
-    res.json(
-        testing.ledger
-    );
-});
-
-app.get('/receiveNewDeviceAndSignature', (req, res)=> {
-    console.log('Request for fake device received');
-    let testing = new DeviceImpl();
-    testing.generateFakeCases();
-    console.log(JSON.stringify(testing.returnSignature()));
-    res.json(
-        {
-            DeviceImpl: testing,
-            signature: testing.returnSignature()
-        }
-    );
-});
-
-//get the cases that is not on the device 
 app.get('/getAllCases', (req, res)=> {
     console.log('Request for all cases received');
     res.json(
@@ -77,6 +45,30 @@ app.get('/getCasesAfter', (req, res) =>{
             Chain.instance.getBlockAfter(hashToGet as string)
         );
     }
+});
+
+
+//for testing purposes
+app.get('/receiveFakeCases', (req, res)=> {
+    console.log('Request for fake cases received');
+    let testing = new DeviceImpl();
+    testing.generateFakeCases();
+    res.json(
+        testing.ledger
+    );
+});
+
+app.get('/receiveNewDeviceAndSignature', (req, res)=> {
+    console.log('Request for fake device received');
+    let testing = new DeviceImpl();
+    testing.generateFakeCases();
+    console.log(JSON.stringify(testing.returnSignature()));
+    res.json(
+        {
+            DeviceImpl: testing,
+            signature: testing.returnSignature()
+        }
+    );
 });
 
 app.listen(portNum);

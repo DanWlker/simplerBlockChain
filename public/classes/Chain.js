@@ -23,9 +23,34 @@ class Chain {
                 ledger: []
             };
     }
+    addCase(senderCase, senderPublicKey, signature) {
+        console.log('Verifying authenticity');
+        const isValid = CryptoHelper_1.CryptoHelper.verifyAuthenticity(senderCase, senderPublicKey, signature);
+        if (isValid) {
+            console.log('Authenticity verified, adding case to pool..');
+            this.pool.ledger.push(senderCase);
+            console.log(`Case added successfully to pool. Current pool size: ${this.pool.ledger.length}`);
+            if (this.pool.ledger.length >= this.blockSize) {
+                console.log('Block size limit reached, creating new block');
+                this.addPoolToChain();
+            }
+        }
+        else {
+            console.log('Case is not valid');
+        }
+    }
+    getBlockAfter(hashToGet) {
+        for (let i = 0; i < this.chain.length; ++i) {
+            if (CryptoHelper_1.CryptoHelper.hash(this.chain[i]) === hashToGet) {
+                return this.chain.slice(i);
+            }
+        }
+        return [];
+    }
     lastBlock() {
         return this.chain[this.chain.length - 1];
     }
+    //used by this class only
     mine(block) {
         console.log('Mining....');
         while (true) {
@@ -35,23 +60,6 @@ class Chain {
                 console.log(`Nonce val: ${block.nonce}`);
                 return;
             }
-        }
-    }
-    addCase(senderCase, senderPublicKey, signature) {
-        console.log('Verifying authenticity');
-        const isValid = CryptoHelper_1.CryptoHelper.verifyAuthenticity(senderCase, senderPublicKey, signature);
-        if (isValid) {
-            console.log('Authenticity verified, adding case..');
-            this.pool.ledger.push(senderCase);
-            console.log('Case added successfully to pool');
-            console.log(`Current pool size: ${this.pool.ledger.length}`);
-            if (this.pool.ledger.length >= this.blockSize) {
-                console.log('Block size limit reached, creating new block');
-                this.addPoolToChain();
-            }
-        }
-        else {
-            console.log('Case is not valid');
         }
     }
     addPoolToChain() {
@@ -65,14 +73,6 @@ class Chain {
             ledger: []
         };
         console.log(this);
-    }
-    getBlockAfter(hashToGet) {
-        for (let i = 0; i < this.chain.length; ++i) {
-            if (CryptoHelper_1.CryptoHelper.hash(this.chain[i]) === hashToGet) {
-                return this.chain.slice(i);
-            }
-        }
-        return [];
     }
 }
 exports.Chain = Chain;

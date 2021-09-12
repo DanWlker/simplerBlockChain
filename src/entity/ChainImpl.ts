@@ -66,4 +66,14 @@ export class ChainImpl {
 
     }
 
+    getBlockAfter(hashToGet: string) {
+        for(let i: number = 0; i < this.chain.length; ++i) {
+            if(this.chain[i].hash === hashToGet) {
+                return this.chain.slice(i);
+            } 
+        }
+
+        return [];
+    }
+
 }

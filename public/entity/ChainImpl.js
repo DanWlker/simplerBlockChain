@@ -68,6 +68,14 @@ class ChainImpl {
             console.log('Case is not valid');
         }
     }
+    getBlockAfter(hashToGet) {
+        for (let i = 0; i < this.chain.length; ++i) {
+            if (this.chain[i].hash === hashToGet) {
+                return this.chain.slice(i);
+            }
+        }
+        return [];
+    }
 }
 exports.ChainImpl = ChainImpl;
 ChainImpl.instance = new ChainImpl();

@@ -27,7 +27,7 @@ app.post('/insertCase', (req, res) => {
         signature: Buffer.from(req.body.signature.data),
     };
     ChainImpl_1.ChainImpl.instance.addCase(formattedReceivedObj.ledger, formattedReceivedObj.publicKey, formattedReceivedObj.signature);
-    res.json({ received: 'success' });
+    res.json({ success: 'true' });
 });
 app.get('/receiveFakeCases', (req, res) => {
     console.log('Request for fake cases received');
@@ -44,6 +44,23 @@ app.get('/receiveNewDeviceAndSignature', (req, res) => {
         DeviceImpl: testing,
         signature: testing.returnSignature()
     });
+});
+//get the cases that is not on the device 
+app.get('/getAllCases', (req, res) => {
+    console.log('Request for all cases received');
+    res.json(ChainImpl_1.ChainImpl.instance.chain);
+});
+app.get('/getCasesAfter', (req, res) => {
+    console.log(`Request for partial cases after ${req.query.hashID} received`);
+    let hashToGet = req.query.hashID;
+    if (hashToGet === undefined) {
+        res.json({
+            success: 'false'
+        });
+    }
+    else {
+        res.json(ChainImpl_1.ChainImpl.instance.getBlockAfter(hashToGet));
+    }
 });
 app.listen(portNum);
 console.log(`Listening to port ${portNum}`);

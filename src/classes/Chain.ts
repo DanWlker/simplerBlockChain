@@ -31,21 +31,31 @@ export class Chain {
     }
 
     addCase(senderCase: Case, senderPublicKey: string, signature: Buffer) {
-        console.log('Verifying authenticity');
+        console.log('Verifying authenticity...');
         const isValid = CryptoHelper.verifyAuthenticity(senderCase, senderPublicKey, signature);
 
-        if(isValid) {
-            console.log('Authenticity verified, adding case to pool..')
-            this.pool.ledger.push(senderCase);
-            console.log(`Case added successfully to pool. Current pool size: ${this.pool.ledger.length}`) 
-
-            if(this.pool.ledger.length >= this.blockSize) {
-                console.log('Block size limit reached, creating new block');
-                this.addPoolToChain();
-            }
-        } else {
-            console.log('Case is not valid');
+        if(!isValid) {
+            console.log('Case does not pass authenticity check');
+            return;
         }
+
+        console.log('Checking for duplicates...')
+        const isDuplicated = this.checkIsDuplicated(senderCase);
+
+        if(isDuplicated) {
+            console.log('Case exists in blockchain or pool');
+            return;
+        }
+            
+        console.log('Adding case to pool...');
+        this.pool.ledger.push(senderCase);
+        console.log(`Case added successfully to pool. Current pool size: ${this.pool.ledger.length}`) 
+
+        if(this.pool.ledger.length >= this.blockSize) {
+            console.log('Block size limit reached, creating new block');
+            this.addPoolToChain();
+        }
+
     }
 
     getBlockAfter(hashToGet: string) {
@@ -63,16 +73,16 @@ export class Chain {
     }
 
     //used by this class only
-    mine(block: Block) {
+    mine(blockToMine: Block) {
         console.log('Mining....');
 
         while(true) {
-            block.nonce += 1;
+            blockToMine.nonce += 1;
 
-            const attempt = CryptoHelper.hash(block);
+            const attempt = CryptoHelper.hash(blockToMine);
 
             if(attempt.substr(0,4) === '0000') {
-                console.log(`Nonce val: ${block.nonce}`);
+                console.log(`Nonce val: ${blockToMine.nonce}`);
                 return;
             }
         }
@@ -89,5 +99,41 @@ export class Chain {
             ledger:[]
         } as Block;
         console.log(this);
+    }
+
+    checkIsDuplicated(caseToCheck: Case) {
+        let found = false;
+
+        this.chain.forEach((blockInChain)=>{
+            if(found) {
+                return;
+            }
+
+            blockInChain.ledger.forEach((caseInBlock) => {
+                if(
+                    CryptoHelper.hash(caseToCheck) ===
+                    CryptoHelper.hash(caseInBlock)
+                ) {
+                    found = true;
+                    return;
+                }
+            });
+        });
+
+        this.pool.ledger.forEach((caseInBlock) => {
+            if(found) {
+                return;
+            }
+
+            if(
+                CryptoHelper.hash(caseToCheck) ===
+                CryptoHelper.hash(caseInBlock)
+            ) {
+                found = true;
+                return;
+            }
+        });
+
+        return found;
     }
 }

@@ -19,20 +19,19 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.BlockImpl = void 0;
+exports.CryptoHelper = void 0;
 const crypto = __importStar(require("crypto"));
-class BlockImpl {
-    constructor(prevHash, ledger, ts = Date.now().toString()) {
-        this.prevHash = prevHash;
-        this.ledger = ledger;
-        this.ts = ts;
-        this.nonce = Math.round(Math.random() * 999999999);
-    }
-    get hash() {
-        const str = JSON.stringify(this);
+class CryptoHelper {
+    static hash(object) {
+        const str = JSON.stringify(object);
         const hash = crypto.createHash('MD5');
         hash.update(str).end();
         return hash.digest('hex');
     }
+    static verifyAuthenticity(object, publicKey, signature) {
+        let verifier = crypto.createVerify('SHA256');
+        verifier.update(object.toString());
+        return verifier.verify(publicKey, signature);
+    }
 }
-exports.BlockImpl = BlockImpl;
+exports.CryptoHelper = CryptoHelper;

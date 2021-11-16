@@ -30,7 +30,7 @@ class CryptoHelper {
     }
     static verifyAuthenticity(object, publicKey, signature) {
         let verifier = crypto.createVerify('SHA256');
-        verifier.update(object.toString());
+        verifier.update(JSON.stringify(object));
         return verifier.verify(publicKey, signature);
     }
 }

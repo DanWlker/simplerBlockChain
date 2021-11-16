@@ -8,9 +8,9 @@ export class CryptoHelper {
         return hash.digest('hex');
     }
 
-    static verifyAuthenticity(object: Object, publicKey: string, signature: Buffer) {
+    static verifyAuthenticity(object: Case, publicKey: string, signature: Buffer) {
         let verifier = crypto.createVerify('SHA256');
-        verifier.update(object.toString());
+        verifier.update(JSON.stringify(object));
 
         return verifier.verify(publicKey, signature);
     }

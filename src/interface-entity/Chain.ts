@@ -1,0 +1,3 @@
+interface Chain {
+    chain: Block[],
+}

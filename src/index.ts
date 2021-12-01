@@ -6,6 +6,7 @@ import fs from 'fs';
 import http from 'http';
 import { CryptoHelper } from "./classes/CryptoHelper";
 import { UniversalVariable } from "./classes/universalVariable";
+const {Worker} = require("worker_threads");
 
 var arrNeighbours:string[] = [];
 
@@ -109,46 +110,6 @@ async function importNeighbours() {
     }
 }
 
-async function mineBlock(blockInstance:Block, temporaryChain:Chain) {
-    CryptoHelper.mine(blockInstance, temporaryChain.chain.length);
-
-    temporaryChain.chain.push(blockInstance);
-    if(temporaryChain.chain.length <= UniversalVariable.length) { //if received a longer chain
-        return;
-    }
-
-    DecentralizedChainHelper.instance.addToChain(temporaryChain);
-
-    //need to push to other nodes
-    const data = JSON.stringify(DecentralizedChainHelper.instance.chains[0]);
-    
-    for(const line of arrNeighbours) {
-      const options = {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Content-Length': data.length
-        }
-      }
-      
-      const req = http.request(line+'/foundLongerChain', options, res => {
-        console.log(`statusCode: ${res.statusCode}`)
-      
-        res.on('data', d => {
-          process.stdout.write(d)
-        });
-      });
-      
-      req.on('error', error => {
-        console.error(error)
-      });
-      
-      req.write(data);
-      req.end();
-    }
-    console.log("Current longest chain is: ");
-    console.log(DecentralizedChainHelper.instance.getLongestChain());
-}
 
 let app = express();
 const portNum = 3000;
@@ -188,7 +149,6 @@ app.get('/getLatestChain', (req, res)=> {
 
 
 app.post('/insertNewBlockFromPool', (req, res)=> {
-    res.json({'status': 'received'});
 
     DecentralizedChainHelper.instance.removeSmallerChain();
 
@@ -205,7 +165,13 @@ app.post('/insertNewBlockFromPool', (req, res)=> {
         ledger:req.body as Case[]
     } as Block;
 
-    mineBlock(newBlock, temporaryChain);
+    const worker = new Worker("./multithreading/worker.js", {workerData: {
+        blockInstance:newBlock,
+        temporaryChain:temporaryChain,
+        arrNeighbours:arrNeighbours,
+    }});
+
+    res.json({'status': 'received'});
 });
 
 

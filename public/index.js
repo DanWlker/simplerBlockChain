@@ -10,7 +10,7 @@ const readline_1 = __importDefault(require("readline"));
 const fs_1 = __importDefault(require("fs"));
 const http_1 = __importDefault(require("http"));
 const CryptoHelper_1 = require("./classes/CryptoHelper");
-const universalVariable_1 = require("./classes/universalVariable");
+const { Worker } = require("worker_threads");
 var arrNeighbours = [];
 function IsJsonString(str) {
     try {
@@ -101,38 +101,6 @@ async function importNeighbours() {
         });
     }
 }
-async function mineBlock(blockInstance, temporaryChain) {
-    CryptoHelper_1.CryptoHelper.mine(blockInstance, temporaryChain.chain.length);
-    temporaryChain.chain.push(blockInstance);
-    if (temporaryChain.chain.length <= universalVariable_1.UniversalVariable.length) { //if received a longer chain
-        return;
-    }
-    DecentralizedChainHelper_1.DecentralizedChainHelper.instance.addToChain(temporaryChain);
-    //need to push to other nodes
-    const data = JSON.stringify(DecentralizedChainHelper_1.DecentralizedChainHelper.instance.chains[0]);
-    for (const line of arrNeighbours) {
-        const options = {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Content-Length': data.length
-            }
-        };
-        const req = http_1.default.request(line + '/foundLongerChain', options, res => {
-            console.log(`statusCode: ${res.statusCode}`);
-            res.on('data', d => {
-                process.stdout.write(d);
-            });
-        });
-        req.on('error', error => {
-            console.error(error);
-        });
-        req.write(data);
-        req.end();
-    }
-    console.log("Current longest chain is: ");
-    console.log(DecentralizedChainHelper_1.DecentralizedChainHelper.instance.getLongestChain());
-}
 let app = (0, express_1.default)();
 const portNum = 3000;
 app.use(express_1.default.json());
@@ -158,7 +126,6 @@ app.get('/getLatestChain', (req, res) => {
     res.json(DecentralizedChainHelper_1.DecentralizedChainHelper.instance.chains[0]);
 });
 app.post('/insertNewBlockFromPool', (req, res) => {
-    res.json({ 'status': 'received' });
     DecentralizedChainHelper_1.DecentralizedChainHelper.instance.removeSmallerChain();
     let temporaryChain = DecentralizedChainHelper_1.DecentralizedChainHelper.instance.chains[0];
     let newBlock = {
@@ -167,7 +134,12 @@ app.post('/insertNewBlockFromPool', (req, res) => {
         nonce: 0,
         ledger: req.body
     };
-    mineBlock(newBlock, temporaryChain);
+    const worker = new Worker("./multithreading/worker.js", { workerData: {
+            blockInstance: newBlock,
+            temporaryChain: temporaryChain,
+            arrNeighbours: arrNeighbours,
+        } });
+    res.json({ 'status': 'received' });
 });
 app.post('/foundLongerChain', (req, res) => {
     res.json({ 'status': 'received' });

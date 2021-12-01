@@ -20,7 +20,7 @@ export class DecentralizedChainHelper {
         let maxChainNum = 0;
         for (let i = 1; i < this.chains.length; i++) {
             if(this.chains[i].chain.length > this.chains[maxChainNum].chain.length) {
-                console.log("Found larger chain");
+                console.log("Found larger chain [decentralized]");
                 maxChainNum = i;
             } else if(this.chains[i].chain.length === this.chains[maxChainNum].chain.length) {
                 console.log("There are two similar sized chains. Keeping the oldest temporarily")

@@ -42,7 +42,7 @@ class CryptoHelper {
             const attempt = this.hash(blockToMine);
             if (temporaryChainLength > 0) { //not genesis
                 if (temporaryChainLength + 1 <= universalVariable_1.UniversalVariable.instance.currentLongestChain) {
-                    console.log('Found longer chain, returning');
+                    console.log('Found longer chain, returning [cryptohelper]');
                     return;
                 }
             }

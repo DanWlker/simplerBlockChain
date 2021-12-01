@@ -28,7 +28,7 @@ export class CryptoHelper {
 
             if(temporaryChainLength > 0) {  //not genesis
                 if(temporaryChainLength+1 <= UniversalVariable.instance.currentLongestChain){
-                    console.log('Found longer chain, returning');
+                    console.log('Found longer chain, returning [cryptohelper]');
                     return;
                 }
             }

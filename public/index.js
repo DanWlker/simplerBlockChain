@@ -102,7 +102,7 @@ async function importNeighbours() {
     }
 }
 let app = (0, express_1.default)();
-const portNum = 3000;
+const portNum = 4000;
 app.use(express_1.default.json());
 app.use(express_1.default.urlencoded({ extended: true }));
 app.get('/getAllCases', (req, res) => {
@@ -139,14 +139,16 @@ app.post('/insertNewBlockFromPool', (req, res) => {
             temporaryChain: temporaryChain,
             arrNeighbours: arrNeighbours,
         } });
+    worker.on('message', (result) => {
+    });
     res.json({ 'status': 'received' });
 });
 app.post('/foundLongerChain', (req, res) => {
     res.json({ 'status': 'received' });
-    console.log('Received longer chain ');
+    console.log('Received longer chain [/foundLongerChain]');
     let newChain = req.body;
     DecentralizedChainHelper_1.DecentralizedChainHelper.instance.addToChain(newChain);
-    console.log("Current longest chain is: ");
+    console.log("Current longest chain is  [/foundLongerChain]: ");
     console.log(DecentralizedChainHelper_1.DecentralizedChainHelper.instance.getLongestChain());
 });
 // //for testing purposes

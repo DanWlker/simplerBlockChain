@@ -5,12 +5,15 @@ import { parentPort, workerData } from 'worker_threads';
 import http from 'http';
 parentPort?.postMessage(mineBlock(workerData.blockInstance, workerData.temporaryChain, workerData.arrNeighbours));
 
+//TODO: use parent port message and worker message to pass and retrieve data betwen them
+// refer https://levelup.gitconnected.com/simple-bidirectional-messaging-in-node-js-worker-threads-7fe41de22e3c
 function mineBlock(blockInstance:Block, temporaryChain:Chain, arrNeighbours:string[]) {
     CryptoHelper.mine(blockInstance, temporaryChain.chain.length);
 
     temporaryChain.chain.push(blockInstance);
     if(temporaryChain.chain.length <= UniversalVariable.length) { //if received a longer chain
-        return;
+      console.log('This is a shorter chain [workerNode]')
+      return;
     }
 
     DecentralizedChainHelper.instance.addToChain(temporaryChain);
@@ -42,6 +45,6 @@ function mineBlock(blockInstance:Block, temporaryChain:Chain, arrNeighbours:stri
       req.write(data);
       req.end();
     }
-    console.log("Current longest chain is: ");
+    console.log("Current longest chain is [workernode]: ");
     console.log(DecentralizedChainHelper.instance.getLongestChain());
 }

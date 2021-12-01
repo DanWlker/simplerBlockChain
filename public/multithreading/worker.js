@@ -13,6 +13,7 @@ function mineBlock(blockInstance, temporaryChain, arrNeighbours) {
     CryptoHelper_1.CryptoHelper.mine(blockInstance, temporaryChain.chain.length);
     temporaryChain.chain.push(blockInstance);
     if (temporaryChain.chain.length <= universalVariable_1.UniversalVariable.length) { //if received a longer chain
+        console.log('This is a shorter chain [workerNode]');
         return;
     }
     DecentralizedChainHelper_1.DecentralizedChainHelper.instance.addToChain(temporaryChain);
@@ -38,6 +39,6 @@ function mineBlock(blockInstance, temporaryChain, arrNeighbours) {
         req.write(data);
         req.end();
     }
-    console.log("Current longest chain is: ");
+    console.log("Current longest chain is [workernode]: ");
     console.log(DecentralizedChainHelper_1.DecentralizedChainHelper.instance.getLongestChain());
 }

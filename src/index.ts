@@ -9,6 +9,7 @@ import { UniversalVariable } from "./classes/universalVariable";
 const {Worker} = require("worker_threads");
 
 var arrNeighbours:string[] = [];
+let workersAlive:typeof Worker[] = [];
 
 function IsJsonString(str:string) {
     try {
@@ -152,7 +153,8 @@ app.post('/insertNewBlockFromPool', (req, res)=> {
 
     DecentralizedChainHelper.instance.removeSmallerChain();
 
-    let temporaryChain = DecentralizedChainHelper.instance.chains[0];
+    let temporaryChainRename = DecentralizedChainHelper.instance.chains[0];
+    console.log('temporary chain length: ' + temporaryChainRename.chain.length);
 
     let newBlock = {
         prevHash: CryptoHelper.hash(
@@ -165,15 +167,49 @@ app.post('/insertNewBlockFromPool', (req, res)=> {
         ledger:req.body as Case[]
     } as Block;
 
+
+    console.log('created worker');
     const worker = new Worker("./multithreading/worker.js", {workerData: {
         blockInstance:newBlock,
-        temporaryChain:temporaryChain,
+        temporaryChain:temporaryChainRename,
         arrNeighbours:arrNeighbours,
     }});
 
-    worker.on('message', (result) => {
+    worker.on('message', (result:any) => {
+        console.log('received message from workers');
+        DecentralizedChainHelper.instance.addToChain(result);
+        //need to push to other nodes
+        const data = JSON.stringify(DecentralizedChainHelper.instance.chains[0]);
         
+        for(const line of arrNeighbours) {
+        const options = {
+            method: 'POST',
+            headers: {
+            'Content-Type': 'application/json',
+            'Content-Length': data.length
+            }
+        }
+        
+        const req = http.request(line+'/foundLongerChain', options, res => {
+            console.log(`statusCode: ${res.statusCode}`)
+        
+            res.on('data', d => {
+            process.stdout.write(d)
+            });
+        });
+        
+        req.on('error', error => {
+            console.error(error)
+        });
+        
+        req.write(data);
+        req.end();
+        }
+
+        console.log(DecentralizedChainHelper.instance.getLongestChain());
     })
+
+    workersAlive.push(worker);
 
     res.json({'status': 'received'});
 });
@@ -183,6 +219,17 @@ app.post('/foundLongerChain', (req, res)=>{
     res.json({'status': 'received'});
     console.log('Received longer chain [/foundLongerChain]');
     let newChain = req.body as Chain;
+    if(newChain.chain.length > DecentralizedChainHelper.instance.chains[0].chain.length) {
+        for(var i = 0; i < workersAlive.length; ++i) {
+            workersAlive[i].terminate();
+        }
+        workersAlive = [];
+    } else {
+        console.log('received chain is not longer' + newChain.chain.length);
+        console.log('compared to receive chain, current longest chain is ' + DecentralizedChainHelper.instance.chains[0].chain.length);
+        return;
+    }
+    console.log('length of workers alive: ' + workersAlive.length);
     DecentralizedChainHelper.instance.addToChain(newChain);
     console.log("Current longest chain is  [/foundLongerChain]: ");
     console.log(DecentralizedChainHelper.instance.getLongestChain());

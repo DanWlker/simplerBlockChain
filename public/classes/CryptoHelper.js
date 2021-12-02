@@ -21,7 +21,6 @@ var __importStar = (this && this.__importStar) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.CryptoHelper = void 0;
 const crypto = __importStar(require("crypto"));
-const universalVariable_1 = require("./universalVariable");
 class CryptoHelper {
     static hash(object) {
         const str = JSON.stringify(object);
@@ -40,12 +39,6 @@ class CryptoHelper {
         while (true) {
             blockToMine.nonce += 1;
             const attempt = this.hash(blockToMine);
-            if (temporaryChainLength > 0) { //not genesis
-                if (temporaryChainLength + 1 <= universalVariable_1.UniversalVariable.instance.currentLongestChain) {
-                    console.log('Found longer chain, returning [cryptohelper]');
-                    return;
-                }
-            }
             if (attempt.substr(0, 4) === '0000') {
                 console.log(`Nonce val: ${blockToMine.nonce}`);
                 return;

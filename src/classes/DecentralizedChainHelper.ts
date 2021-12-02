@@ -15,7 +15,7 @@ export class DecentralizedChainHelper {
             return;
         }
 
-        console.log("chain length " + this.chains.length);
+        console.log("Chain array length " + this.chains.length);
 
         let maxChainNum = 0;
         for (let i = 1; i < this.chains.length; i++) {
@@ -30,6 +30,7 @@ export class DecentralizedChainHelper {
         this.chains = [];
         this.chains.push(tempStorage);
         UniversalVariable.instance.currentLongestChain = tempStorage.chain.length;
+        console.log("Longest chain length currently: " + DecentralizedChainHelper.instance.chains[0].chain.length);
     }
 
     verifyAllBlocksInChain(chainInstance:Chain):boolean {

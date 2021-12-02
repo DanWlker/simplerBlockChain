@@ -26,13 +26,6 @@ export class CryptoHelper {
 
             const attempt = this.hash(blockToMine);
 
-            if(temporaryChainLength > 0) {  //not genesis
-                if(temporaryChainLength+1 <= UniversalVariable.instance.currentLongestChain){
-                    console.log('Found longer chain, returning [cryptohelper]');
-                    return;
-                }
-            }
-
             if(attempt.substr(0,4) === '0000') {
                 console.log(`Nonce val: ${blockToMine.nonce}`);
                 return;

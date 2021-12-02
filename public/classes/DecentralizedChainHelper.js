@@ -13,7 +13,7 @@ class DecentralizedChainHelper {
         if (this.chains.length <= 1) {
             return;
         }
-        console.log("chain length " + this.chains.length);
+        console.log("Chain array length " + this.chains.length);
         let maxChainNum = 0;
         for (let i = 1; i < this.chains.length; i++) {
             if (this.chains[i].chain.length > this.chains[maxChainNum].chain.length) {
@@ -28,6 +28,7 @@ class DecentralizedChainHelper {
         this.chains = [];
         this.chains.push(tempStorage);
         universalVariable_1.UniversalVariable.instance.currentLongestChain = tempStorage.chain.length;
+        console.log("Longest chain length currently: " + DecentralizedChainHelper.instance.chains[0].chain.length);
     }
     verifyAllBlocksInChain(chainInstance) {
         let previousHashHolder = 'genesis';

@@ -1,12 +1,26 @@
 import express from 'express';
 import { Pool } from './classes/Pool';
 let app = express();
-const portNum = 3000;
+const portNum = 5000;
 app.use(express.json());
 app.use(express.urlencoded({extended:true}));
 import http from 'http';
+import fs from 'fs'
+import readline from 'readline';
 
 var arrNodes:string[] = [];
+
+async function importNeighbours() {
+    const fileStream = fs.createReadStream('neighbours.txt');
+    const rl = readline.createInterface({
+        input: fileStream,
+        crlfDelay: Infinity
+      });
+ 
+    for await (const line of rl) {
+        arrNodes.push(line);
+    }
+}
 
 //Receive new case
 app.post('/insertCase', (req, res)=> {
@@ -54,5 +68,6 @@ app.post('/insertCase', (req, res)=> {
     }
 });
 
+importNeighbours()
 app.listen(portNum);
 console.log(`Listening to port ${portNum}`);

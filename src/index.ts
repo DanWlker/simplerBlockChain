@@ -176,7 +176,7 @@ app.post('/insertNewBlockFromPool', (req, res)=> {
     }});
 
     worker.on('message', (result:any) => {
-        console.log('received message from workers');
+        console.log('Worker has finished mining block');
         DecentralizedChainHelper.instance.addToChain(result);
         //need to push to other nodes
         const data = JSON.stringify(DecentralizedChainHelper.instance.chains[0]);
@@ -217,9 +217,11 @@ app.post('/insertNewBlockFromPool', (req, res)=> {
 
 app.post('/foundLongerChain', (req, res)=>{
     res.json({'status': 'received'});
-    console.log('Received longer chain [/foundLongerChain]');
+    console.log('Received chain broadcast from other node');
     let newChain = req.body as Chain;
     if(newChain.chain.length > DecentralizedChainHelper.instance.chains[0].chain.length) {
+        console.log('Received chain is longer than local chain, terminating worker')
+    
         for(var i = 0; i < workersAlive.length; ++i) {
             workersAlive[i].terminate();
         }
